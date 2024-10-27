@@ -46,7 +46,7 @@ Any arguments passed to `app_updater.py` will be forwarded to the application af
 A configuration file with the same name as the script (ending with `.json`) will be created automatically, storing settings for the updater.
 
 #### Example Configuration
-The is also the default config, provided as an example. 
+This is also the default config, here provided as an example. 
 
 ```
 {
