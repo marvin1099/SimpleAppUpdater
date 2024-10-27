@@ -1,7 +1,3 @@
-Here’s an updated README with your specifications:
-
----
-
 # SimpleAppUpdater
 
 **SimpleAppUpdater** is a versatile Python-based script that automates the process of checking for, downloading, and launching the latest version of an application from a GitHub repository or similar API. It is designed to update any portable application that follows a GitHub-like API structure with a list of releases, each containing `tag_name` and a `browser_download_url` in the assets section.
