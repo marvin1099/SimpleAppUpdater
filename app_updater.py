@@ -109,7 +109,7 @@ def main():
 
     if not download_url:
         print(f"Download URL for {app.stem} not found in the latest release.")
-        srunner(app)
+        runner(app)
         return
 
     # Download the file and update config with the new version
