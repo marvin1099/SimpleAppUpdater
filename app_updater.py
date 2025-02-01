@@ -38,6 +38,8 @@ def load_config():
     else:
         config = default_config
         save_config(config)
+        print("Config was created. Exiting to allow config editing")
+        exit()
 
     return config
 
