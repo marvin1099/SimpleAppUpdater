@@ -23,7 +23,7 @@ config_file = script.parent / (script.stem + ".json")
 # Default configuration
 default_config = {
     "repo_api": "https://api.github.com/repos/FreeTubeApp/FreeTube/releases",
-    "file_pattern": "^freetube_.*_amd64\\.AppImage$",
+    "file_pattern": "freetube-([0-9.]+)-amd64\\.AppImage",
     "app_file":"FreeTube.AppImage",
     "latest_version": "",
     "get_releases":True,
@@ -37,7 +37,8 @@ def load_config():
             config = json.load(f)
     else:
         config = default_config
-        save_config(config)  # Save default config if file doesn't exist
+        save_config(config)
+
     return config
 
 # Save configuration to file
@@ -52,16 +53,47 @@ def download_latest_release(download_url, file_name, latest_version):
         with open(file_name, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
-        print(f"Download complete of: {file_name}")
-        print(f"Updated to / downloaded version: {latest_version}")
+        print(f"Download complete of: \"{download_url}\"")
+        print(f"The file was saved as: \"{file_name}\"")
+        print(f"Updated to / downloaded version: \"{latest_version}\"")
     else:
         print("Failed to download the file.")
 
 def runner(app):
     if app.exists():
+        config = load_config()
+        if config.get("missing_file"):
+            del config["missing_file"]
+            save_config(config)
+            del config
+
+        print(f"\n--- Starting {app.name} ---\n")
         subprocess.run([str(app)] + args)
+        return
     else:
-        print("There was some issue with the downloading, the app file\n'" + str(app) + "'\nis missing but should have been downloaded,\ncheck the config and submit a bug if the issue persists")
+        config = load_config()
+        missing_file = config.get("missing_file", False)
+        latest_version = config.get("latest_version")
+        if not latest_version:
+            print("App was not jet downloaded. Closing")
+            return
+        if not missing_file:
+            config["missing_file"] = True
+            config["latest_version"] = ""
+            save_config(config)
+            print(f"The file {app.name} is missing, tying to redownload\n")
+            main()
+            config = load_config()
+            if not config.get("latest_version"):
+                config["latest_version"] = latest_version
+            save_config(config)
+            return
+        else:
+            del config["missing_file"]
+            save_config(config)
+
+        print(f"\nThere was some issue with the downloading, the app file\n\t'{app}'\nis missing but should have been downloaded,\ncheck the config and submit a bug if the issue persists")
+        return
 
 # Main script logic
 def main():
@@ -75,7 +107,26 @@ def main():
 
     # Get the release data from a github API / github compatible API
     response = requests.get(api_url)
-    release_data = response.json()
+    if response.status_code == 404:
+        print("URL not found.\nStarting last downloaded app.")
+        runner(app)
+        return
+    elif response.status_code >= 500 and response.status_code < 600:
+        print("Server error: {} {}".format(response.status_code, response.reason))
+        runner(app)
+        return
+    else:
+        if response.content.strip() == b'':
+            print("Response is empty or contains no data.\nStarting last downloaded app.")
+            runner(app)
+            return
+    try:
+        release_data = response.json()
+    except Exception as e:
+        print("Did not get any json data from the response.\nStarting last downloaded app.")
+        runner(app)
+        return
+
 
     if not pre and not rel:
         rel = True
@@ -89,14 +140,17 @@ def main():
             data.append(item)
             break
 
-
-    latest_release = data[0]
-    latest_version = latest_release["tag_name"]
-
+    try:
+        latest_release = data[0]
+        latest_version = latest_release["tag_name"]
+    except Exception as e:
+        print("Was not able to get the data or the release tag.\nStarting last downloaded app.")
+        runner(app)
+        return
 
     # Compare the current version with the latest version
     if current_version == latest_version:
-        print(f"You already have the latest version ({current_version}) downloaded.")
+        print(f"You already have the latest version ({current_version}) downloaded.\nStarting last downloaded app.")
         runner(app)
         return
 
@@ -108,7 +162,7 @@ def main():
     )
 
     if not download_url:
-        print(f"Download URL for {app.stem} not found in the latest release.")
+        print(f"Download URL for {app.stem} not found in the latest release.\nFile assets or the file regex where not found.\nStarting last downloaded app.")
         runner(app)
         return
 
