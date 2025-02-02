@@ -33,9 +33,10 @@ app_updater.py
 
 When run, the script:
 1. Loads its configuration from a JSON file named after the script (`app_updater.json` in this case).
-2. Checks the API for the latest release or pre-release version based on the config.
-3. Downloads the latest version if it’s newer than the current version stored in the config.
-4. Launches the application with any arguments provided.
+2. If the file is missing it gets created and the app exits so the file can be edited.
+3. Checks the API for the latest release or pre-release version based on the config.
+4. Downloads the latest version if it’s newer than the current version stored in the config.
+5. Launches the application with any arguments provided.
 
 ### Command-Line Arguments
 
@@ -43,7 +44,10 @@ Any arguments passed to `app_updater.py` will be forwarded to the application af
 
 ### Config File (`app_updater.json`)
 
-A configuration file with the same name as the script (ending with `.json`) will be created automatically, storing settings for the updater.
+A configuration file with the same name as the script (ending with `.json`)  
+will be created automatically, storing settings for the updater.
+But as mentioned if the configuration file is created the fist time the app will exit,   
+to allow editing of the config before running the updater.
 
 #### Example Configuration
 This is also the default config, here provided as an example. 
@@ -51,7 +55,7 @@ This is also the default config, here provided as an example.
 ```
 {
     "repo_api": "https://api.github.com/repos/FreeTubeApp/FreeTube/releases",
-    "file_pattern": "^freetube_.*_amd64\\.AppImage$",
+    "file_pattern": "freetube-([0-9.]+)-amd64\\.AppImage",
     "app_file": "FreeTube.AppImage",
     "latest_version": "",
     "get_releases": true,
@@ -65,8 +69,11 @@ This is also the default config, here provided as an example.
 - `file_pattern`: Regex pattern to match the name of the downloadable asset.
 - `app_file`: Filename to save and launch the downloaded application.
 - `latest_version`: Tracks the last downloaded version of the application.
-- `get_releases`: Set to `true` to include official releases in update checks.
+- `get_releases`: Set to `true` to include releases in update checks.
 - `get_prereleases`: Set to `true` to include pre-releases in update checks.
+
+If get_releases and get_prereleases are false get_releases will be set to true.
+This is like that, so there is allways something to download.
 
 ### Example Workflow
 
