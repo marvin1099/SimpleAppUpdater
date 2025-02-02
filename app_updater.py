@@ -47,7 +47,7 @@ if platform.system() == "Linux":
 elif platform.system() == "Windows":
     default_config.update({
         "file_pattern": "freetube-([0-9.]+)-win-x64-portable\\.exe",
-        "app_file":"SatisfactoryModManager.exe"
+        "app_file":"FreeTube.exe"
     })
 
 # Load configuration from file or use defaults
