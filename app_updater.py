@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
+import re
 import os
 import sys
 import json
 import requests
-import re
-from pathlib import Path
+import platform
 import subprocess
+from pathlib import Path
 
 # Determine the base directory and config file path based on execution mode
 if getattr(sys, 'frozen', False):
@@ -29,6 +30,25 @@ default_config = {
     "get_releases":True,
     "get_prereleases":True
 }
+
+if platform.system() == "Linux":
+    if "SatisfactoryModManager".lower() in str(script.name).lower():
+        default_config.update({
+            "repo_api": "https://api.github.com/repos/satisfactorymodding/SatisfactoryModManager/releases",
+            "file_pattern": "SatisfactoryModManager_linux_amd64",
+            "app_file":"SatisfactoryModManager"
+        })
+    elif "Suyu".lower() in str(script.name).lower():
+        default_config.update({
+            "repo_api": "https://git.suyu.dev/api/v1/repos/suyu/suyu/releases",
+            "file_pattern": "Suyu-Linux_x86_64\\.AppImage",
+            "app_file":"Suyu.AppImage"
+        })
+elif platform.system() == "Windows":
+    default_config.update({
+        "file_pattern": "freetube-([0-9.]+)-win-x64-portable\\.exe",
+        "app_file":"SatisfactoryModManager.exe"
+    })
 
 # Load configuration from file or use defaults
 def load_config():
