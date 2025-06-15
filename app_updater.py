@@ -78,6 +78,17 @@ def download_latest_release(download_url, file_name, latest_version):
         print(f"Download complete of: \"{download_url}\"")
         print(f"The file was saved as: \"{file_name}\"")
         print(f"Updated to / downloaded version: \"{latest_version}\"")
+
+        # Make the file executable
+        if platform.system() == "Windows":
+            # Windows doesn't need chmod. Executable permission is inherent. If it does not work, it probable does not work without admin access.
+            print("No chmod needed for Windows.")
+        else: # Linux or macOS or others # platform.system() == "Linux" or platform.system() == "Darwin":  
+            try:
+                subprocess.run(["chmod", "+x", file_name], check=True)  # Use subprocess for command
+                print(f"Made {file_name} executable.")
+            except subprocess.CalledProcessError as e:
+                print(f"Error making {file_name} executable: {e}")
     else:
         print("Failed to download the file.")
 
