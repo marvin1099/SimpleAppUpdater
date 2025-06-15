@@ -21,7 +21,7 @@ pip install requests
 ## Usage
 
 ### Downloading
-Check out the [releases section](https://codeberg.org/marvin1099/https://codeberg.org/marvin1099/SimpleAppUpdater/releases) for the latest py file.
+Check out the [releases section](https://codeberg.org/marvin1099/SimpleAppUpdater/releases) for the latest py file.
 Binarys will be added in soon.
 
 ### Running the Script
